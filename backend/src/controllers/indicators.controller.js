@@ -1,14 +1,12 @@
-const pool = require('../config/db');
-const catchAsync = require('../utils/catchAsync');
-const { sendSuccess } = require('../utils/response');
-const AppError = require('../utils/AppError');
+const { catchAsync, AppError, sendSuccess } = require('../utils');
+const { query, getConnection } = require('../utils/db');
 
 async function attachDetails(indicator) {
-  const [levels] = await pool.query(
+  const [levels] = await query(
     'SELECT level_no, description FROM indicator_levels WHERE indicator_id = ? ORDER BY level_no',
     [indicator.id]
   );
-  const [evidence] = await pool.query(
+  const [evidence] = await query(
     'SELECT evidence_type FROM indicator_evidence_types WHERE indicator_id = ?',
     [indicator.id]
   );
@@ -22,14 +20,14 @@ exports.listIndicators = catchAsync(async (req, res) => {
   const params = [];
   if (topic_id) { sql += ' WHERE topic_id = ?'; params.push(topic_id); }
   sql += ' ORDER BY created_at ASC';
-  const [rows] = await pool.query(sql, params);
+  const [rows] = await query(sql, params);
   const detailed = await Promise.all(rows.map(attachDetails));
   sendSuccess(res, detailed);
 });
 
 // GET /api/indicators/:id
 exports.getIndicator = catchAsync(async (req, res, next) => {
-  const [rows] = await pool.query('SELECT * FROM indicators WHERE id = ?', [req.params.id]);
+  const [rows] = await query('SELECT * FROM indicators WHERE id = ?', [req.params.id]);
   if (!rows.length) return next(new AppError('ไม่พบตัวชี้วัด', 404));
   sendSuccess(res, await attachDetails(rows[0]));
 });
@@ -50,7 +48,7 @@ exports.createIndicator = catchAsync(async (req, res, next) => {
     return next(new AppError('รูปแบบ scale ต้องระบุคำอธิบายระดับให้ครบ 4 ระดับ', 400));
   }
 
-  const conn = await pool.getConnection();
+  const conn = await getConnection();
   try {
     await conn.beginTransaction();
     const [result] = await conn.query(
@@ -81,7 +79,7 @@ exports.createIndicator = catchAsync(async (req, res, next) => {
 // PUT /api/indicators/:id
 exports.updateIndicator = catchAsync(async (req, res, next) => {
   const { name, description, weight } = req.body;
-  const [result] = await pool.query(
+  const [result] = await query(
     'UPDATE indicators SET name = COALESCE(?, name), description = COALESCE(?, description), weight = COALESCE(?, weight) WHERE id = ?',
     [name, description, weight, req.params.id]
   );
@@ -91,7 +89,8 @@ exports.updateIndicator = catchAsync(async (req, res, next) => {
 
 // DELETE /api/indicators/:id
 exports.deleteIndicator = catchAsync(async (req, res, next) => {
-  const [result] = await pool.query('DELETE FROM indicators WHERE id = ?', [req.params.id]);
+  const [result] = await query('DELETE FROM indicators WHERE id = ?', [req.params.id]);
   if (!result.affectedRows) return next(new AppError('ไม่พบตัวชี้วัด', 404));
   sendSuccess(res, null, 'ลบตัวชี้วัดสำเร็จ');
 });
+

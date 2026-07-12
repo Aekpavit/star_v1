@@ -2,13 +2,16 @@ const router = require('express').Router();
 const ctrl = require('../controllers/indicators.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const admin = authorize('admin');
 router.use(authenticate);
 
-router.get('/', ctrl.listIndicators);
-router.get('/:id', ctrl.getIndicator);
+router.route('/')
+  .get(ctrl.listIndicators)
+  .post(admin, ctrl.createIndicator);
 
-router.post('/', authorize('admin'), ctrl.createIndicator);
-router.put('/:id', authorize('admin'), ctrl.updateIndicator);
-router.delete('/:id', authorize('admin'), ctrl.deleteIndicator);
+router.route('/:id')
+  .get(ctrl.getIndicator)
+  .put(admin, ctrl.updateIndicator)
+  .delete(admin, ctrl.deleteIndicator);
 
 module.exports = router;

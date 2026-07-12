@@ -1,7 +1,5 @@
-const pool = require('../config/db');
-const catchAsync = require('../utils/catchAsync');
-const { sendSuccess } = require('../utils/response');
-const AppError = require('../utils/AppError');
+const { catchAsync, AppError, sendSuccess } = require('../utils');
+const { query } = require('../utils/db');
 
 // POST /api/assignments  { committee_id, evaluatee_id }
 // ข้อ 5.1.8: มอบหมายกรรมการให้ประเมินผู้รับการประเมินแต่ละคน
@@ -10,13 +8,13 @@ exports.createAssignment = catchAsync(async (req, res, next) => {
   if (!committee_id || !evaluatee_id) {
     return next(new AppError('กรุณาระบุกรรมการและผู้รับการประเมิน', 400));
   }
-  const [users] = await pool.query('SELECT id, role FROM users WHERE id IN (?, ?)', [committee_id, evaluatee_id]);
+  const [users] = await query('SELECT id, role FROM users WHERE id IN (?, ?)', [committee_id, evaluatee_id]);
   const committee = users.find((u) => u.id === Number(committee_id));
   const evaluatee = users.find((u) => u.id === Number(evaluatee_id));
   if (!committee || committee.role !== 'committee') return next(new AppError('ไม่พบกรรมการที่ระบุ', 400));
   if (!evaluatee || evaluatee.role !== 'evaluatee') return next(new AppError('ไม่พบผู้รับการประเมินที่ระบุ', 400));
 
-  const [result] = await pool.query(
+  const [result] = await query(
     'INSERT INTO committee_assignments (committee_id, evaluatee_id, assigned_by) VALUES (?, ?, ?)',
     [committee_id, evaluatee_id, req.user.id]
   );
@@ -25,7 +23,7 @@ exports.createAssignment = catchAsync(async (req, res, next) => {
 
 // GET /api/assignments  (admin: รายการมอบหมายทั้งหมด พร้อมสถานะ)
 exports.listAssignments = catchAsync(async (req, res) => {
-  const [rows] = await pool.query(
+  const [rows] = await query(
     `SELECT ca.id, ca.assigned_at,
             c.id AS committee_id, c.name AS committee_name, c.committee_role,
             e.id AS evaluatee_id, e.name AS evaluatee_name, e.department,
@@ -41,7 +39,8 @@ exports.listAssignments = catchAsync(async (req, res) => {
 
 // DELETE /api/assignments/:id
 exports.deleteAssignment = catchAsync(async (req, res, next) => {
-  const [result] = await pool.query('DELETE FROM committee_assignments WHERE id = ?', [req.params.id]);
+  const [result] = await query('DELETE FROM committee_assignments WHERE id = ?', [req.params.id]);
   if (!result.affectedRows) return next(new AppError('ไม่พบรายการมอบหมาย', 404));
   sendSuccess(res, null, 'ยกเลิกการมอบหมายสำเร็จ');
 });
+

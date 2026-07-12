@@ -5,12 +5,12 @@ const upload = require('../middleware/upload');
 
 router.use(authenticate, authorize('evaluatee'));
 
-router.get('/me', ctrl.myAssessments);
-router.post('/', ctrl.saveScore);
-router.post('/:indicatorId/evidence', upload.single('file'), ctrl.uploadEvidence);
-router.get('/progress', ctrl.progress);
-router.get('/feedback', ctrl.feedback);
-router.post('/:indicatorId/reevaluate', ctrl.requestReevaluation);
-router.get('/export', ctrl.exportCsv);
+router.route('/me').get(ctrl.myAssessments);
+router.route('/').post(ctrl.saveScore);
+router.route('/:indicatorId/evidence').post(upload.single('file'), ctrl.uploadEvidence);
+router.route('/progress').get(ctrl.progress);
+router.route('/feedback').get(ctrl.feedback);
+router.route('/:indicatorId/reevaluate').post(ctrl.requestReevaluation);
+router.route('/export').get(ctrl.exportCsv);
 
 module.exports = router;

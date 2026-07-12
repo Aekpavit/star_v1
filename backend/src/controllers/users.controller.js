@@ -1,8 +1,6 @@
 const bcrypt = require('bcryptjs');
-const pool = require('../config/db');
-const catchAsync = require('../utils/catchAsync');
-const { sendSuccess } = require('../utils/response');
-const AppError = require('../utils/AppError');
+const { catchAsync, AppError, sendSuccess } = require('../utils');
+const { query } = require('../utils/db');
 
 // POST /api/users  (admin only)
 // Used by the admin to create committee accounts (ข้อ 5.1.7) or additional
@@ -15,11 +13,11 @@ exports.createUser = catchAsync(async (req, res, next) => {
   if (!['admin', 'evaluatee', 'committee'].includes(role)) {
     return next(new AppError('บทบาทไม่ถูกต้อง', 400));
   }
-  const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+  const [existing] = await query('SELECT id FROM users WHERE email = ?', [email]);
   if (existing.length) return next(new AppError('อีเมลนี้ถูกใช้งานแล้ว', 400));
 
   const password_hash = await bcrypt.hash(password, 10);
-  const [result] = await pool.query(
+  const [result] = await query(
     `INSERT INTO users (name, email, password_hash, role, committee_role, position, department, school_name, phone)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [name, email, password_hash, role, committee_role || null, position || null, department || null, school_name || null, phone || null]
@@ -34,13 +32,13 @@ exports.listUsers = catchAsync(async (req, res) => {
   const params = [];
   if (role) { sql += ' WHERE role = ?'; params.push(role); }
   sql += ' ORDER BY created_at DESC';
-  const [rows] = await pool.query(sql, params);
+  const [rows] = await query(sql, params);
   sendSuccess(res, rows);
 });
 
 // GET /api/users/:id
 exports.getUser = catchAsync(async (req, res, next) => {
-  const [rows] = await pool.query(
+  const [rows] = await query(
     'SELECT id, name, email, role, committee_role, position, department, school_name, phone, created_at FROM users WHERE id = ?',
     [req.params.id]
   );
@@ -51,7 +49,7 @@ exports.getUser = catchAsync(async (req, res, next) => {
 // PUT /api/users/:id  (ข้อ 5.1.6: จัดการข้อมูลผู้รับการประเมิน — ใช้ endpoint นี้ร่วมกันได้)
 exports.updateUser = catchAsync(async (req, res, next) => {
   const { name, position, department, school_name, phone, committee_role } = req.body;
-  const [result] = await pool.query(
+  const [result] = await query(
     `UPDATE users SET name = COALESCE(?, name), position = COALESCE(?, position),
      department = COALESCE(?, department), school_name = COALESCE(?, school_name),
      phone = COALESCE(?, phone), committee_role = COALESCE(?, committee_role)
@@ -61,3 +59,4 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   if (!result.affectedRows) return next(new AppError('ไม่พบผู้ใช้', 404));
   sendSuccess(res, null, 'อัปเดตข้อมูลสำเร็จ');
 });
+

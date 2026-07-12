@@ -1,11 +1,10 @@
-const pool = require('../config/db');
-const catchAsync = require('../utils/catchAsync');
-const { sendSuccess } = require('../utils/response');
+const { catchAsync, sendSuccess } = require('../utils');
+const { query } = require('../utils/db');
 
 // GET /api/reports/committee-summary
 // ข้อ 5.1.10 และ 5.1.11: สรุปผลรายกรรมการ + ติดตามสถานะการประเมินของกรรมการแต่ละคน
 exports.committeeSummary = catchAsync(async (req, res) => {
-  const [rows] = await pool.query(
+  const [rows] = await query(
     `SELECT c.id AS committee_id, c.name, c.committee_role,
             COUNT(ca.id) AS assigned_count,
             SUM(CASE WHEN s.is_active = 1 THEN 1 ELSE 0 END) AS signed_count
@@ -22,7 +21,7 @@ exports.committeeSummary = catchAsync(async (req, res) => {
 // GET /api/reports/evaluatees-status
 // ข้อ 5.1.12: ติดตามสถานะการประเมินของผู้รับการประเมิน
 exports.evaluateesStatus = catchAsync(async (req, res) => {
-  const [rows] = await pool.query(
+  const [rows] = await query(
     `SELECT e.id, e.name, e.department,
             COUNT(i.id) AS total_indicators,
             SUM(CASE WHEN sa.status = 'done' THEN 1 ELSE 0 END) AS done_indicators
@@ -41,12 +40,12 @@ exports.evaluateesStatus = catchAsync(async (req, res) => {
 exports.evaluateeReport = catchAsync(async (req, res) => {
   const evaluateeId = req.params.id;
 
-  const [profile] = await pool.query(
+  const [profile] = await query(
     'SELECT id, name, position, department, school_name FROM users WHERE id = ?',
     [evaluateeId]
   );
 
-  const [indicators] = await pool.query(
+  const [indicators] = await query(
     `SELECT i.id, i.name, i.weight, i.format, t.name AS topic_name,
             sa.self_score, sa.status
      FROM indicators i
@@ -56,7 +55,7 @@ exports.evaluateeReport = catchAsync(async (req, res) => {
     [evaluateeId]
   );
 
-  const [committeeScores] = await pool.query(
+  const [committeeScores] = await query(
     `SELECT u.name AS committee_name, i.name AS indicator_name, cs.score, cs.comment,
             s.is_active AS is_signed
      FROM committee_assignments ca
@@ -71,3 +70,4 @@ exports.evaluateeReport = catchAsync(async (req, res) => {
 
   sendSuccess(res, { profile: profile[0] || null, self_assessments: indicators, committee_scores: committeeScores });
 });
+

@@ -1,9 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const pool = require('../config/db');
-const catchAsync = require('../utils/catchAsync');
-const { sendSuccess } = require('../utils/response');
-const AppError = require('../utils/AppError');
+const { catchAsync, AppError, sendSuccess } = require('../utils');
+const { query } = require('../utils/db');
 
 function signToken(user) {
   return jwt.sign(
@@ -21,17 +19,17 @@ exports.register = catchAsync(async (req, res, next) => {
   if (!name || !email || !password) {
     return next(new AppError('กรุณากรอกชื่อ อีเมล และรหัสผ่าน', 400));
   }
-  const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+  const existing = await query('SELECT id FROM users WHERE email = ?', [email]);
   if (existing.length) return next(new AppError('อีเมลนี้ถูกใช้งานแล้ว', 400));
 
   const password_hash = await bcrypt.hash(password, 10);
-  const [result] = await pool.query(
+  const result = await query(
     `INSERT INTO users (name, email, password_hash, role, position, department, school_name, phone)
      VALUES (?, ?, ?, 'evaluatee', ?, ?, ?, ?)`,
     [name, email, password_hash, position || null, department || null, school_name || null, phone || null]
   );
 
-  const [rows] = await pool.query(
+  const rows = await query(
     'SELECT id, name, email, role, position, department, school_name, phone FROM users WHERE id = ?',
     [result.insertId]
   );
@@ -44,7 +42,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) return next(new AppError('กรุณากรอกอีเมลและรหัสผ่าน', 400));
 
-  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+  const rows = await query('SELECT * FROM users WHERE email = ?', [email]);
   if (!rows.length) return next(new AppError('อีเมลหรือรหัสผ่านไม่ถูกต้อง', 401));
 
   const user = rows[0];
@@ -58,7 +56,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 // GET /api/auth/me
 exports.me = catchAsync(async (req, res) => {
-  const [rows] = await pool.query(
+  const rows = await query(
     'SELECT id, name, email, role, committee_role, position, department, school_name, phone FROM users WHERE id = ?',
     [req.user.id]
   );

@@ -1,7 +1,5 @@
-const pool = require('../config/db');
-const catchAsync = require('../utils/catchAsync');
-const { sendSuccess } = require('../utils/response');
-const AppError = require('../utils/AppError');
+const { catchAsync, AppError, sendSuccess } = require('../utils');
+const { query, getConnection } = require('../utils/db');
 
 // Ensures a self_assessments row exists for (evaluatee, indicator) and
 // returns its id. Used by both the score-save and evidence-upload flows.
@@ -21,7 +19,7 @@ async function ensureSelfAssessment(conn, evaluateeId, indicatorId) {
 // GET /api/self-assessments/me
 // ข้อ 5.2.2: แสดงตัวชี้วัดทั้งหมดของผู้รับการประเมิน พร้อมข้อมูล/คะแนน/หลักฐานปัจจุบัน
 exports.myAssessments = catchAsync(async (req, res) => {
-  const [rows] = await pool.query(
+  const [rows] = await query(
     `SELECT i.id AS indicator_id, i.name, i.description, i.weight, i.format,
             t.id AS topic_id, t.name AS topic_name,
             sa.id AS self_assessment_id, sa.self_score, sa.status, sa.submitted_at
@@ -36,7 +34,7 @@ exports.myAssessments = catchAsync(async (req, res) => {
   const indicatorIds = rows.map((r) => r.indicator_id);
   let evidenceRows = [];
   if (indicatorIds.length) {
-    [evidenceRows] = await pool.query(
+    [evidenceRows] = await query(
       `SELECT ef.self_assessment_id, ef.evidence_type, ef.file_path, ef.uploaded_at
        FROM evidence_files ef
        JOIN self_assessments sa ON sa.id = ef.self_assessment_id
@@ -59,7 +57,7 @@ exports.saveScore = catchAsync(async (req, res, next) => {
   if (!indicator_id || self_score == null) {
     return next(new AppError('กรุณาระบุตัวชี้วัดและคะแนน', 400));
   }
-  const [indRows] = await pool.query('SELECT format FROM indicators WHERE id = ?', [indicator_id]);
+  const [indRows] = await query('SELECT format FROM indicators WHERE id = ?', [indicator_id]);
   if (!indRows.length) return next(new AppError('ไม่พบตัวชี้วัด', 404));
   const { format } = indRows[0];
   if (format === 'scale' && ![1, 2, 3, 4].includes(Number(self_score))) {
@@ -69,7 +67,7 @@ exports.saveScore = catchAsync(async (req, res, next) => {
     return next(new AppError('คะแนนแบบ มี/ไม่มี ต้องเป็น 0 หรือ 1', 400));
   }
 
-  const conn = await pool.getConnection();
+  const conn = await getConnection();
   try {
     const id = await ensureSelfAssessment(conn, req.user.id, indicator_id);
     await conn.query(
@@ -86,7 +84,7 @@ exports.saveScore = catchAsync(async (req, res, next) => {
 // ข้อ 5.2.3: เพิ่มหลักฐาน (ไฟล์ PDF/รูปภาพ) หรือ URL ผ่าน body { url }
 exports.uploadEvidence = catchAsync(async (req, res, next) => {
   const { indicatorId } = req.params;
-  const conn = await pool.getConnection();
+  const conn = await getConnection();
   try {
     const selfAssessmentId = await ensureSelfAssessment(conn, req.user.id, indicatorId);
 
@@ -113,7 +111,7 @@ exports.uploadEvidence = catchAsync(async (req, res, next) => {
 // GET /api/self-assessments/progress
 // ข้อ 5.2.5: ดูความคืบหน้าในการดำเนินงานของแต่ละหัวข้อ
 exports.progress = catchAsync(async (req, res) => {
-  const [rows] = await pool.query(
+  const [rows] = await query(
     `SELECT t.id AS topic_id, t.name AS topic_name,
             COUNT(i.id) AS total,
             SUM(CASE WHEN sa.status = 'done' THEN 1 ELSE 0 END) AS done
@@ -129,7 +127,7 @@ exports.progress = catchAsync(async (req, res) => {
 // GET /api/self-assessments/feedback
 // ข้อ 5.2.7: ดูความเห็นของกรรมการรายตัวชี้วัด
 exports.feedback = catchAsync(async (req, res) => {
-  const [rows] = await pool.query(
+  const [rows] = await query(
     `SELECT i.id AS indicator_id, i.name AS indicator_name,
             cs.score, cs.comment, cs.scored_at,
             u.name AS committee_name
@@ -149,21 +147,21 @@ exports.feedback = catchAsync(async (req, res) => {
 exports.requestReevaluation = catchAsync(async (req, res, next) => {
   const { indicatorId } = req.params;
   const { reason } = req.body;
-  const [rows] = await pool.query(
+  const [rows] = await query(
     'SELECT id, status FROM self_assessments WHERE evaluatee_id = ? AND indicator_id = ?',
     [req.user.id, indicatorId]
   );
   if (!rows.length) return next(new AppError('ยังไม่มีการประเมินตัวชี้วัดนี้', 404));
   if (rows[0].status !== 'done') return next(new AppError('ขอรับการประเมินใหม่ได้เฉพาะรายการที่ทำเสร็จแล้ว', 400));
 
-  await pool.query('INSERT INTO reevaluation_requests (self_assessment_id, reason) VALUES (?, ?)', [rows[0].id, reason || null]);
-  await pool.query('UPDATE self_assessments SET status = "reeval" WHERE id = ?', [rows[0].id]);
+  await query('INSERT INTO reevaluation_requests (self_assessment_id, reason) VALUES (?, ?)', [rows[0].id, reason || null]);
+  await query('UPDATE self_assessments SET status = "reeval" WHERE id = ?', [rows[0].id]);
   sendSuccess(res, null, 'ส่งคำขอรับการประเมินใหม่สำเร็จ', 201);
 });
 
 // GET /api/self-assessments/export  (ข้อ 5.2.6: Export เป็นไฟล์ CSV)
 exports.exportCsv = catchAsync(async (req, res) => {
-  const [rows] = await pool.query(
+  const [rows] = await query(
     `SELECT t.name AS topic, i.name AS indicator, i.weight, sa.self_score, sa.status
      FROM indicators i
      JOIN evaluation_topics t ON t.id = i.topic_id
@@ -180,3 +178,4 @@ exports.exportCsv = catchAsync(async (req, res) => {
   res.setHeader('Content-Disposition', 'attachment; filename="self_evaluation_export.csv"');
   res.send('\uFEFF' + header + body);
 });
+
