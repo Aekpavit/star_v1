@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 const uploadDir = process.env.UPLOAD_DIR || 'uploads';
 app.use('/uploads', express.static(path.join(__dirname, '..', uploadDir)));
 
-app.get('/api/health', (req, res) => {
+app.get('/api/test', (req, res) => {
   res.json({ status: 'success', message: 'API is running', data: null });
 });
 
