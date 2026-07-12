@@ -1,20 +1,29 @@
-import express from "express";
-import { connectDB } from "./config/db.js";
-import { env } from "./config/env.js";
+require('dotenv').config();
+const os = require('os');
+const app = require('./app');
+const pool = require('./config/db');
 
-const app = express();
-app.use(express.json());
+const PORT = process.env.PORT || 4000;
+const HOST = process.env.HOST || '0.0.0.0';
 
-app.get("/", (req, res) => {
-  res.send("Server ใช้ได้ ");
-});
+async function start() {
+  try {
+    // Fail fast with a clear message if MySQL isn't reachable on localhost.
+    await pool.query('SELECT 1');
+    console.log('เชื่อมต่อฐานข้อมูลสำเร็จ');
+    app.listen(PORT, HOST, () => {
+      const addresses = Object.values(os.networkInterfaces())
+        .flat()
+        .filter((detail) => detail && detail.family === 'IPv4' && !detail.internal)
+        .map((detail) => detail.address);
 
-const start = async () => {
-  await connectDB();
-
-  app.listen(env.PORT, () => {
-    console.log(` Server : http://localhost:${env.PORT}`);
-  });
-};
+      const displayHosts = Array.from(new Set([`http://localhost:${PORT}`, ...addresses.map((address) => `http://${address}:${PORT}`)]));
+      console.log(`Server กำลังทำงานที่ ${displayHosts.join(', ')}`);
+    });
+  } catch (err) {
+    console.error('เชื่อมต่อฐานข้อมูลไม่สำเร็จ:', err.message);
+    process.exit(1);
+  }
+}
 
 start();
