@@ -1,27 +1,23 @@
 import { createRouter, createWebHistory } from "vue-router";
+import DashboardLayout from "./layouts/DashboardLayout.vue";
+import Dashboard from "./views/Dashboard.vue";
 import Login from "./views/login.vue";
-import Register from "./views/regis.vue";
+import Regis from "./views/regis.vue";
 
 const routes = [
+  { path: "/login", component: Login },
+  { path: "/regis", component: Regis },
   {
     path: "/",
-    redirect: "/login",
-  },
-  {
-    path: "/login",
-    name: "Login",
-    component: Login,
-  },
-  {
-    path: "/register",
-    name: "Register",
-    component: Register,
+    component: DashboardLayout,
+    children: [
+      { path: "", redirect: "/dashboard" },
+      { path: "dashboard", component: Dashboard },
+    ],
   },
 ];
 
-const router = createRouter({
+export default createRouter({
   history: createWebHistory(),
   routes,
 });
-
-export default router;

@@ -93,10 +93,10 @@ const handleLogin = () => {
           Don't Have An Account ?
 
           <router-link
-            to="/register"
+            to="/regis"
             class="ml-1 font-semibold text-blue-600 hover:underline"
           >
-            sign up
+            register
           </router-link>
         </p>
       </form>
