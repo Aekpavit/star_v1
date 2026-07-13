@@ -23,18 +23,18 @@ const displayHost = HOST === '0.0.0.0' ? localIp : HOST;
 
 async function startServer() {
   try {
-    const [rows] = await db.query('SELECT 1 as ok');
+    await db.query('SELECT 1');
     console.log('Database connection: OK');
-    console.log(`Database test query result: ${JSON.stringify(rows[0])}`);
+
+    app.listen(PORT, HOST, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+      console.log(`Server runLAN at http://172.16.193.206:${PORT}/api/test`);
+    });
   } catch (error) {
     console.error('Database connection: FAILED');
     console.error(error.message);
+    process.exit(1);
   }
-
-  app.listen(PORT, HOST, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-    console.log(`Server available on LAN at http://${displayHost}:${PORT}`);
-  });
 }
 
 startServer();

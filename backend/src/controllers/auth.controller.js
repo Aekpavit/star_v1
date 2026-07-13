@@ -46,6 +46,10 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!rows.length) return next(new AppError('อีเมลหรือรหัสผ่านไม่ถูกต้อง', 401));
 
   const user = rows[0];
+
+   console.log("User =", user);
+   console.log("password_hash =", user.password_hash);
+
   const match = await bcrypt.compare(password, user.password_hash);
   if (!match) return next(new AppError('อีเมลหรือรหัสผ่านไม่ถูกต้อง', 401));
 
