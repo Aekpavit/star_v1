@@ -2,15 +2,73 @@
 import { Eye, EyeOff } from "lucide-vue-next";
 import { ref } from "vue";
 
-const username = ref("");
+const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
 
-const handleLogin = () => {
-  console.log({
-    username: username.value,
-    password: password.value,
-  });
+// const handleLogin = () => {
+//   console.log({
+//     username: username.value,
+//     password: password.value,
+//   });
+// const handleLogin = async () => {
+//   try {
+//     const response = await fetch("http://172.16.40.93:6767/api/auth/login", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         username: email.value,
+//         password: password.value,
+//       }),
+//     });
+
+//     const data = await response.json();
+
+//     console.log(data);
+//   } catch (err) {
+//     console.error(err);
+//   }
+//   const data = await response.json();
+
+//     if (response.ok) {
+//       console.log("Login Success");
+
+//       // ไปหน้า Home
+//       router.push("/home");
+//     } else {
+//       alert(data.message);
+//     }
+//   } catch (error) {
+//     console.error(error);
+//   }
+// };
+const handleLogin = async () => {
+  try {
+    const response = await fetch("http://172.16.40.93:6767/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email.value,
+        password: password.value,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log("Login Success");
+
+      router.push("./dashboard.vue");
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 </script>
 
@@ -26,15 +84,15 @@ const handleLogin = () => {
       <form @submit.prevent="handleLogin" class="space-y-5">
         <div class="text-left">
           <label
-            for="username"
+            for="email"
             class="mb-2 block text-sm font-medium text-slate-700"
           >
-            user or email
+            email
           </label>
 
           <input
-            id="username"
-            v-model="username"
+            id="email"
+            v-model="email"
             type="email"
             placeholder="Enter your email"
             class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
@@ -82,11 +140,18 @@ const handleLogin = () => {
           />
         </div> -->
 
-        <button
+        <!-- <button
+          @click = ""
           type="submit"
           class="w-full rounded-md bg-orange-400 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
         >
           login
+        </button> -->
+        <button
+          type="submit"
+          class="w-full rounded-md bg-orange-400 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
+        >
+          Login
         </button>
 
         <p class="text-center text-xs text-slate-500">
