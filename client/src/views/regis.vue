@@ -130,7 +130,9 @@ const handleRegister = () => {
         <button
           type="submit"
           class="w-full rounded-md bg-orange-400 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
-        ></button>
+        >
+          register
+        </button>
 
         <p class="text-center text-xs text-slate-500">
           Already Have An Account ?
