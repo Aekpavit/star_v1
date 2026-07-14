@@ -5,15 +5,13 @@ import Login from "./views/login.vue";
 import Regis from "./views/regis.vue";
 
 const routes = [
+  { path: "/", redirect: "/login" },
   { path: "/login", component: Login },
   { path: "/regis", component: Regis },
   {
-    path: "/",
+    path: "/dashboard",
     component: DashboardLayout,
-    children: [
-      { path: "", redirect: "/dashboard" },
-      { path: "dashboard", component: Dashboard },
-    ],
+    children: [{ path: "", component: Dashboard }],
   },
 ];
 

@@ -24,9 +24,9 @@
           <span>วันปิดระบบ วว ดด ปป วล</span>
         </div>
 
-        <div class="flex items-center justify-between mb-4">
+        <!-- <div class="flex items-center justify-between mb-4">
           <button @click="prevMonth" class="text-gray-400 hover:text-gray-700">
-            ‹
+            "‹"
           </button>
           <div class="flex gap-2">
             <select
@@ -38,6 +38,34 @@
               </option>
             </select>
             <select
+              v-model="currentYear"
+              class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm"
+            >
+              <option v-for="y in years" :key="y" :value="y">{{ y }}</option>
+            </select>
+          </div>
+          <button @click="nextMonth" class="text-gray-400 hover:text-gray-700">
+            "›"
+          </button>
+        </div> -->
+        <div class="flex items-center justify-between mb-4">
+          <button @click="prevMonth" class="text-gray-400 hover:text-gray-700">
+            ‹
+          </button>
+          <div class="flex gap-2">
+            <label for="month-select" class="sr-only">เลือกเดือน</label>
+            <select
+              id="month-select"
+              v-model="currentMonth"
+              class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm"
+            >
+              <option v-for="(m, i) in months" :key="i" :value="i">
+                {{ m }}
+              </option>
+            </select>
+            <label for="year-select" class="sr-only">เลือกปี</label>
+            <select
+              id="year-select"
               v-model="currentYear"
               class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm"
             >

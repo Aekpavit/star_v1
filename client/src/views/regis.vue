@@ -9,16 +9,66 @@ const confirmPassword = ref("");
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-const handleRegister = () => {
-  if (password.value !== confirmPassword.value) {
-    console.error("Passwords do not match");
+// const handleRegister = () => {
+//   if (password.value !== confirmPassword.value) {
+//     console.error("Passwords do not match");
+//     return;
+//   }
+//   console.log({
+//     username: username.value,
+//     email: email.value,
+//     password: password.value,
+//   });
+// };
+const handleRegister = async () => {
+  // เช็คว่ากรอกครบไหม
+  if (!email.value || !password.value || !confirmPassword.value) {
+    alert("Please fill all fields");
     return;
   }
-  console.log({
-    username: username.value,
-    email: email.value,
-    password: password.value,
-  });
+
+  // condition for check password i kuy alert
+  if (password.value !== confirmPassword.value) {
+    alert("Password does not match");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://172.16.40.93:6767/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // email: email.value, ปิดไว้ก่อนค่อยดึง
+        username: username.value,
+        password: password.value,
+
+        // เอาไว้กัน backend บังคับให้ใส่ เผื่อไม่ตรง
+        // ถ้าดึงemail ลบตัว emailด้านล่างออก
+        email: "",
+        name: "",
+        position: "",
+        department: "",
+        school_name: "",
+        phone: "",
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Register failed");
+      return;
+    }
+
+    alert("Register Success!");
+
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+    alert("Cannot connect to server");
+  }
 };
 </script>
 
@@ -50,7 +100,7 @@ const handleRegister = () => {
           />
         </div>
 
-        <div class="text-left">
+        <!-- <div class="text-left">
           <label
             for="email"
             class="mb-2 block text-sm font-medium text-slate-700"
@@ -66,7 +116,7 @@ const handleRegister = () => {
             required
             class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
           />
-        </div>
+        </div> -->
 
         <div>
           <div class="mb-2 flex items-center justify-between">
@@ -130,6 +180,7 @@ const handleRegister = () => {
         <button
           type="submit"
           class="w-full rounded-md bg-orange-400 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
+          @click="handleRegister"
         >
           register
         </button>

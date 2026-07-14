@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="w-64 h-screen bg-white border-r border-gray-200 flex flex-col p-6"
+    class="w-64 h-2-screen bg-white border-r border-gray-200 flex flex-col p-6"
   >
     <div class="flex items-center gap-2 mb-8">
       <span class="w-5 h-5 rounded-full bg-primary"></span>

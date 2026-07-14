@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { Eye, EyeOff } from "lucide-vue-next";
 import { ref } from "vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const email = ref("");
 const password = ref("");
 const showPassword = ref(false);
@@ -62,7 +64,7 @@ const handleLogin = async () => {
     if (response.ok) {
       console.log("Login Success");
 
-      router.push("./dashboard.vue");
+      router.push("/dashboard");
     } else {
       alert(data.message);
     }
