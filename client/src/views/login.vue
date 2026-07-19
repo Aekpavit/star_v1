@@ -150,6 +150,7 @@ const handleLogin = async () => {
           login
         </button> -->
         <button
+          @button="handleLogin"
           type="submit"
           class="w-full rounded-md bg-orange-400 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
         >

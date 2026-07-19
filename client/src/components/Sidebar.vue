@@ -13,7 +13,8 @@
         :key="item.path"
         :to="item.path"
         class="flex items-center gap-2 px-3 py-3 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition"
-        active-class="!bg-primary !text-white"
+        active-class="!bg-orange-50 !text-orange-600 !font-semibold"
+        exact-active-class="!bg-orange-50 !text-orange-600 !font-semibold"
       >
         <component :is="item.icon" class="w-4 h-4" />
         <span>{{ item.label }}</span>
