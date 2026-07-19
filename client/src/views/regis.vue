@@ -4,30 +4,22 @@ import { ref } from "vue";
 
 const username = ref("");
 const email = ref("");
+const name = ref("");
+const position = ref("");
+const department = ref("");
+const schoolName = ref("");
+const phone = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
-// const handleRegister = () => {
-//   if (password.value !== confirmPassword.value) {
-//     console.error("Passwords do not match");
-//     return;
-//   }
-//   console.log({
-//     username: username.value,
-//     email: email.value,
-//     password: password.value,
-//   });
-// };
 const handleRegister = async () => {
-  // เช็คว่ากรอกครบไหม
-  if (!email.value || !password.value || !confirmPassword.value) {
+  if (!username.value || !password.value || !confirmPassword.value) {
     alert("Please fill all fields");
     return;
   }
 
-  // condition for check password i kuy alert
   if (password.value !== confirmPassword.value) {
     alert("Password does not match");
     return;
@@ -40,18 +32,14 @@ const handleRegister = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // email: email.value, ปิดไว้ก่อนค่อยดึง
         username: username.value,
         password: password.value,
-
-        // เอาไว้กัน backend บังคับให้ใส่ เผื่อไม่ตรง
-        // ถ้าดึงemail ลบตัว emailด้านล่างออก
-        email: "",
-        name: "",
-        position: "",
-        department: "",
-        school_name: "",
-        phone: "",
+        email: email.value,
+        name: name.value,
+        position: position.value,
+        department: department.value,
+        school_name: schoolName.value,
+        phone: phone.value,
       }),
     });
 
@@ -63,7 +51,6 @@ const handleRegister = async () => {
     }
 
     alert("Register Success!");
-
     console.log(data);
   } catch (error) {
     console.error(error);
@@ -89,7 +76,6 @@ const handleRegister = async () => {
           >
             Username
           </label>
-
           <input
             id="username"
             v-model="username"
@@ -100,14 +86,13 @@ const handleRegister = async () => {
           />
         </div>
 
-        <!-- <div class="text-left">
+        <div class="text-left">
           <label
             for="email"
             class="mb-2 block text-sm font-medium text-slate-700"
           >
             Email
           </label>
-
           <input
             id="email"
             v-model="email"
@@ -116,7 +101,88 @@ const handleRegister = async () => {
             required
             class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
           />
-        </div> -->
+        </div>
+
+        <div class="text-left">
+          <label
+            for="name"
+            class="mb-2 block text-sm font-medium text-slate-700"
+          >
+            Full Name
+          </label>
+          <input
+            id="name"
+            v-model="name"
+            type="text"
+            placeholder="Enter your full name"
+            required
+            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
+          />
+        </div>
+
+        <div class="text-left">
+          <label
+            for="position"
+            class="mb-2 block text-sm font-medium text-slate-700"
+          >
+            Position
+          </label>
+          <input
+            id="position"
+            v-model="position"
+            type="text"
+            placeholder="Enter your position"
+            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
+          />
+        </div>
+
+        <div class="text-left">
+          <label
+            for="department"
+            class="mb-2 block text-sm font-medium text-slate-700"
+          >
+            Department
+          </label>
+          <input
+            id="department"
+            v-model="department"
+            type="text"
+            placeholder="Enter your department"
+            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
+          />
+        </div>
+
+        <div class="text-left">
+          <label
+            for="schoolName"
+            class="mb-2 block text-sm font-medium text-slate-700"
+          >
+            School Name
+          </label>
+          <input
+            id="schoolName"
+            v-model="schoolName"
+            type="text"
+            placeholder="Enter your school name"
+            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
+          />
+        </div>
+
+        <div class="text-left">
+          <label
+            for="phone"
+            class="mb-2 block text-sm font-medium text-slate-700"
+          >
+            Phone Number
+          </label>
+          <input
+            id="phone"
+            v-model="phone"
+            type="tel"
+            placeholder="Enter your phone number"
+            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
+          />
+        </div>
 
         <div>
           <div class="mb-2 flex items-center justify-between">
@@ -180,14 +246,12 @@ const handleRegister = async () => {
         <button
           type="submit"
           class="w-full rounded-md bg-orange-400 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
-          @click="handleRegister"
         >
           register
         </button>
 
         <p class="text-center text-xs text-slate-500">
           Already Have An Account ?
-
           <router-link
             to="/login"
             class="ml-1 font-semibold text-blue-600 hover:underline"
