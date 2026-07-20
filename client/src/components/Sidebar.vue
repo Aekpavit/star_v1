@@ -39,12 +39,20 @@ const router = useRouter();
 
 const menu = [
   { path: "/dashboard", label: "หน้าหลัก", icon: Home },
-  { path: "/topics", label: "หัวข้อการประเมิน", icon: FileText },
-  { path: "/indicators", label: "ตัวชี้วัด", icon: FileText },
-  { path: "/evaluators", label: "จัดการผู้ประเมิน", icon: Users },
-  { path: "/receivers", label: "จัดการผู้รับการประเมิน", icon: Users },
-  { path: "/reports", label: "รายงานผล", icon: FileText },
-  { path: "/requests", label: "ร้องขอการประเมินใหม่", icon: FileText },
+  { path: "/dashboard/topics", label: "หัวข้อการประเมิน", icon: FileText },
+  { path: "/dashboard/indicators", label: "ตัวชี้วัด", icon: FileText },
+  { path: "/dashboard/evaluators", label: "จัดการผู้ประเมิน", icon: Users },
+  {
+    path: "/dashboard/receivers",
+    label: "จัดการผู้รับการประเมิน",
+    icon: Users,
+  },
+  { path: "/dashboard/reports", label: "รายงานผล", icon: FileText },
+  {
+    path: "/dashboard/requests",
+    label: "ร้องขอการประเมินใหม่",
+    icon: FileText,
+  },
 ];
 
 function logout() {

@@ -4,6 +4,7 @@ import Dashboard from "./views/Dashboard.vue";
 import Login from "./views/login.vue";
 import PlaceholderPage from "./views/PlaceholderPage.vue";
 import Regis from "./views/regis.vue";
+import TopicManagement from "./views/TopicManagement.vue";
 
 const routes = [
   { path: "/", redirect: "/login" },
@@ -16,11 +17,8 @@ const routes = [
       { path: "", component: Dashboard },
       {
         path: "topics",
-        component: PlaceholderPage,
-        props: {
-          title: "หัวข้อการประเมิน",
-          description: "หน้าจัดการหัวข้อการประเมิน",
-        },
+        name: "topics",
+        component: TopicManagement,
       },
       {
         path: "indicators",
