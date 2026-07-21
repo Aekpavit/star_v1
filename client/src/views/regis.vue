@@ -13,19 +13,22 @@ const phone = ref("");
 
 const handleRegister = async () => {
   try {
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: name.value,
-        email: email.value,
-        password: password.value,
-        position: position.value,
-        department: department.value,
-        school_name: schoolName.value,
-        phone: phone.value,
-      }),
-    });
+    const response = await fetch(
+      "http://172.16.47.113:6767/api/auth/register",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.value,
+          email: email.value,
+          password: password.value,
+          position: position.value,
+          department: department.value,
+          school_name: schoolName.value,
+          phone: phone.value,
+        }),
+      },
+    );
 
     const data = await response.json();
     if (response.ok) {
@@ -35,8 +38,9 @@ const handleRegister = async () => {
       alert(data.message || "Registration failed");
     }
   } catch (err) {
-    console.error(err);
-    alert("An error occurred");
+    console.log(err);
+    // console.error(err);
+    // alert("An error occurred");
   }
 };
 </script>
