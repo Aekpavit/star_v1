@@ -1,16 +1,20 @@
 <template>
-  <div class="date-picker" ref="rootEl">
-    <div class="date-picker__input" @click="toggleOpen">
+  <div class="relative w-full" ref="rootEl">
+    <!-- Input -->
+    <div
+      class="flex cursor-pointer items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2"
+      @click="toggleOpen"
+    >
       <input
         type="text"
         readonly
         :placeholder="placeholder"
         :value="displayValue"
+        class="w-full cursor-pointer border-none bg-transparent text-[13px] text-gray-700 outline-none"
       />
+
       <svg
-        class="date-picker__icon"
-        width="16"
-        height="16"
+        class="ml-1.5 h-4 w-4 shrink-0 text-gray-400"
         viewBox="0 0 24 24"
         fill="none"
       >
@@ -39,43 +43,73 @@
       </svg>
     </div>
 
-    <div v-if="open" class="date-picker__panel">
-      <div class="date-picker__header">
-        <button type="button" class="date-picker__nav" @click="shiftMonth(-1)">
+    <!-- Panel -->
+    <div
+      v-if="open"
+      class="absolute left-0 top-[calc(100%+6px)] z-30 w-[260px] rounded-xl border border-gray-200 bg-white p-3 shadow-xl"
+    >
+      <!-- Header -->
+      <div class="mb-2 flex items-center gap-1.5">
+        <button
+          type="button"
+          @click="shiftMonth(-1)"
+          class="flex h-7 w-7 items-center justify-center rounded-md bg-gray-100 text-base text-gray-600 transition hover:bg-gray-200"
+        >
           &lsaquo;
         </button>
 
-        <select v-model.number="viewMonth" class="date-picker__select">
+        <select
+          v-model.number="viewMonth"
+          class="flex-1 rounded-md border border-gray-200 bg-white px-1.5 py-1 text-xs text-gray-700 outline-none"
+        >
           <option v-for="(m, i) in monthNames" :key="m" :value="i">
             {{ m }}
           </option>
         </select>
 
-        <select v-model.number="viewYear" class="date-picker__select">
-          <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+        <select
+          v-model.number="viewYear"
+          class="flex-1 rounded-md border border-gray-200 bg-white px-1.5 py-1 text-xs text-gray-700 outline-none"
+        >
+          <option v-for="y in yearOptions" :key="y" :value="y">
+            {{ y }}
+          </option>
         </select>
 
-        <button type="button" class="date-picker__nav" @click="shiftMonth(1)">
+        <button
+          type="button"
+          @click="shiftMonth(1)"
+          class="flex h-7 w-7 items-center justify-center rounded-md bg-gray-100 text-base text-gray-600 transition hover:bg-gray-200"
+        >
           &rsaquo;
         </button>
       </div>
 
-      <div class="date-picker__weekdays">
-        <span v-for="d in weekdayNames" :key="d">{{ d }}</span>
+      <!-- Week -->
+      <div class="mb-1 grid grid-cols-7 text-center text-[11px] text-gray-400">
+        <span v-for="d in weekdayNames" :key="d">
+          {{ d }}
+        </span>
       </div>
 
-      <div class="date-picker__days">
+      <!-- Days -->
+      <div class="grid grid-cols-7 gap-0.5">
         <button
           v-for="cell in dayCells"
           :key="cell.key"
           type="button"
-          class="date-picker__day"
-          :class="{
-            'is-muted': !cell.inMonth,
-            'is-selected': cell.iso === modelValue,
-            'is-today': cell.iso === todayIso,
-          }"
           @click="selectDay(cell)"
+          :class="[
+            'rounded-md py-1.5 text-xs transition',
+
+            cell.inMonth ? 'text-gray-700' : 'text-gray-300',
+
+            cell.iso === todayIso && 'border border-orange-400',
+
+            cell.iso === modelValue && 'bg-gray-900 text-white',
+
+            cell.iso !== modelValue && 'hover:bg-gray-100',
+          ]"
         >
           {{ cell.day }}
         </button>
@@ -199,125 +233,3 @@ onBeforeUnmount(() =>
   document.removeEventListener("mousedown", handleClickOutside),
 );
 </script>
-
-<style scoped>
-.date-picker {
-  position: relative;
-  width: 100%;
-}
-
-.date-picker__input {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #dcdfe4;
-  border-radius: 8px;
-  padding: 8px 10px;
-  background: #fff;
-  cursor: pointer;
-}
-
-.date-picker__input input {
-  border: none;
-  outline: none;
-  font-size: 13px;
-  width: 100%;
-  color: #333;
-  cursor: pointer;
-  background: transparent;
-}
-
-.date-picker__icon {
-  color: #9aa0a6;
-  flex-shrink: 0;
-  margin-left: 6px;
-}
-
-.date-picker__panel {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 6px);
-  left: 0;
-  width: 260px;
-  background: #fff;
-  border: 1px solid #e4e7eb;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  padding: 12px;
-}
-
-.date-picker__header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.date-picker__nav {
-  border: none;
-  background: #f2f3f5;
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  color: #555;
-  line-height: 1;
-}
-
-.date-picker__nav:hover {
-  background: #e8eaed;
-}
-
-.date-picker__select {
-  flex: 1;
-  border: 1px solid #e4e7eb;
-  border-radius: 6px;
-  padding: 4px 6px;
-  font-size: 12px;
-  color: #333;
-  background: #fff;
-}
-
-.date-picker__weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  font-size: 11px;
-  color: #9aa0a6;
-  margin-bottom: 4px;
-}
-
-.date-picker__days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-
-.date-picker__day {
-  border: none;
-  background: transparent;
-  padding: 6px 0;
-  font-size: 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #333;
-}
-
-.date-picker__day:hover {
-  background: #f2f3f5;
-}
-
-.date-picker__day.is-muted {
-  color: #c7cad1;
-}
-
-.date-picker__day.is-today {
-  border: 1px solid #f0923b;
-}
-
-.date-picker__day.is-selected {
-  background: #2b2b2b;
-  color: #fff;
-}
-</style>
